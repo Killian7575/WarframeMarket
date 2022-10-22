@@ -55,19 +55,20 @@ def getItemAveragePrice(orderList):
     return avgPrice
 
 def updateMarketItemList():
+    # Avoid spamming API by sleeping 1 second once every time the API is called
     sleep(1)
 
     # Request API for item list, raise exception if unsuccessful status code
-    response = requests.get(f"https://api.warframe.market/v1/items/")
+    response = requests.get("https://api.warframe.market/v1/items")
     if response.status_code != 200:
         raise Exception('Status Code: ', response.status_code)
 
+    # Create variables to use from the response content
+    jsonString = str(response.content)[2:-1].replace('\\', '') # Manually remove escaped char since idk what causes them
+    jsonList = json.loads(jsonString)
 
+    # Extract just the list of items from the json file
+    itemList = [i for i in jsonList['payload']['items']]
 
-    with open('.data/warframeMarketItemList.json', 'r') as myFile:
-        file_data = json.loads(myFile.read())
-    payload = [i for i in file_data['myitems']]
-
-    with open('./data/transformedItemList', 'w') as outFile:
-        outFile.write(str(payload))
-    pass
+    # Save extracted data for later loading
+    pickleSave(itemList, 'transformedItemList', './data')

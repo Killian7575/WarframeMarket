@@ -1,1 +1,5 @@
 orders/*
+*:Zone.Identifier
+__pycache__
+*.json
+*.pkl

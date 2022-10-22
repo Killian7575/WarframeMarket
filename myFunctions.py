@@ -72,6 +72,9 @@ def updateMarketItemList():
     # Extract just the list of items from the json file
     itemList = [i for i in jsonList['payload']['items']]
 
+    # Add Additional information like tags to each item
+    itemList = addAdditionalInfoToItems(itemList)
+
     # Save extracted data for later loading
     pickleSave(itemList, 'transformedItemList', './data')
 
@@ -86,26 +89,97 @@ def loadMarketItemList():
     # Load and return itemList from file
     return pickleLoad('transformedItemList', './data')
 
-def findItemsInList(query, itemList):
-    return [{'item_name': x['item_name'],
-            'url_name': x['url_name'],
-            'id': x['id']} for x in itemList if query in x['item_name']]
+def allQueriesInKey(queries, key, item):
+    # For every query
+    for q in queries:
+        # Check if it doesn't match item
+        if q not in item[key]:
+            return False # If there's a query that doesn't match key, return False
+    return True # Else return True
 
-def queryPricesOf(*queries):
+def findItemsInList(*queries, itemList, key='item_name'):
+    # Build list with every item matching query/ies
+    return [x for x in itemList if allQueriesInKey(queries, key, x)]
+
+def queryPricesOf(*queries, itemList, key='item_name'):
+    # Pre-set variables
     query = []
-    itemList = loadMarketItemList()
 
-    rawQuery = list(np.array([findItemsInList(i, itemList) for i in queries]).flatten())
-    print(rawQuery)
+    if key == 'item_name':
+        # Creates an "or" search that grabs all matching items for each query
+        rawQuery = list(np.array([findItemsInList(i, itemList, key) for i in queries]).flatten())
 
-    for item in rawQuery:
-        if item not in query:
-            query.append(item)
+        # Filters the rawQuery by removing any duplicates
+        for item in rawQuery:
+            if item not in query:
+                query.append(item)
+    else:
+        # Creates an "and" search that grabs all items that match all the query terms
+        query = findItemsInList(queries, itemList=itemList, key=key)
 
-
+    # Gets the current average price for each item and adds it as a key in each item
     for item in query:
         orders = getWarframeMarketOrders(item['url_name'])
         price = getItemAveragePrice(orders)
         item['price'] = price
 
     return query
+
+def getItemData(itemUrl=str):
+
+    # Defines path
+    path = Path(f'./data/itemInfo/{itemUrl}.json')
+
+    # If the path exists, get itemData from that file
+    if path.exists():
+        with open(path, 'r') as file:
+            itemData = json.loads(file.read())
+    else: # Else request it from the API
+        # 1 second delay before each call so i can't spam API
+        sleep(1)
+
+        # Request item info from API
+        response = requests.get(f'https://api.warframe.market/v1/items/{itemUrl}')
+        # Raise exception if status code doesn't indicate successful
+        if response.status_code != 200:
+            raise Exception('Status Code: ', response.status_code)
+
+        # Save item info to file
+        with open(path, 'w') as outfile:
+            outfile.write(response.content.decode())
+        # Load to python dictionary to return
+        itemData = json.loads(response.content.decode())
+
+    return itemData
+
+def addAdditionalInfoToItems(itemList):
+    # Initialise pre-set variables
+    listIndex = 0
+
+    for item in itemList:
+        
+        # Get item info i'm after which is in ['items_in_set']
+        itemInfo = getItemData(item['url_name'])['payload']['item']['items_in_set']
+
+        # If there is more than 1 item in "items_in_set", use the one that matches what i searched 
+        if len(itemInfo) > 1:
+            for e, item in enumerate(itemInfo):
+                if item['url_name'] == item['url_name']:
+                    listIndex = e
+                    break
+
+        # Attempt to add each type of info to item, if it doesn't exist, just skip
+        item['tags'] = itemInfo[listIndex]['tags']
+        try:
+            item['subtypes'] = itemInfo[listIndex]['subtypes']
+        except:
+            pass
+        try:
+            item['set_root'] = itemInfo[listIndex]['set_root']
+        except:
+            pass
+        try:
+            item['rarity'] = itemInfo[listIndex]['rarity']
+        except:
+            pass
+    return itemList

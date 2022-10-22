@@ -20,7 +20,7 @@ def getWarframeMarketOrders(itemUrlName=str):
         sleep(1)
 
         # Request API for order list, raise exception if unsuccessful status code
-        response = requests.get(f"https://api.warframe.market/v1/items/{itemUrlName}/orders")
+        response = requests.get(f'https://api.warframe.market/v1/items/{itemUrlName}/orders')
         if response.status_code != 200:
             raise Exception('Status Code: ', response.status_code)
 
@@ -44,8 +44,8 @@ def getItemAveragePrice(orderList):
     totalQuantity = 0
 
     # Extract item price and quantity in each order
-    itemSellPriceAndQuantity = [{"price": d["platinum"],
-                                 "quantity": d["quantity"]} for d in orderList]
+    itemSellPriceAndQuantity = [{'price': d['platinum'],
+                                 'quantity': d['quantity']} for d in orderList]
 
     # Calculate average item price
     for d in itemSellPriceAndQuantity:    
@@ -61,7 +61,7 @@ def updateMarketItemList():
     sleep(1)
 
     # Request API for item list, raise exception if unsuccessful status code
-    response = requests.get("https://api.warframe.market/v1/items")
+    response = requests.get('https://api.warframe.market/v1/items')
     if response.status_code != 200:
         raise Exception('Status Code: ', response.status_code)
 
@@ -83,9 +83,9 @@ def loadMarketItemList():
     return pickleLoad('transformedItemList', './data')
 
 def findItemsInList(query, itemList):
-    return [{"item_name": x["item_name"],
-            "url_name": x["url_name"],
-            "id": x["id"]} for x in itemList if query in x['item_name']]
+    return [{'item_name': x['item_name'],
+            'url_name': x['url_name'],
+            'id': x['id']} for x in itemList if query in x['item_name']]
 
 def queryPricesOf(*queries):
     query = []

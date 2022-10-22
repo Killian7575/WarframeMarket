@@ -3,8 +3,9 @@ from pathlib import Path
 import json
 from time import sleep
 from pickleUtil import pickleSave, pickleLoad
+import numpy as np
 
-def getWarframeMarketOrders(itemUrlName):
+def getWarframeMarketOrders(itemUrlName=str):
     # Define my file path
     myPath = Path(f'./orders/{itemUrlName}.json')
 
@@ -85,3 +86,22 @@ def findItemsInList(query, itemList):
     return [{"item_name": x["item_name"],
             "url_name": x["url_name"],
             "id": x["id"]} for x in itemList if query in x['item_name']]
+
+def queryPricesOf(*queries):
+    query = []
+    itemList = loadMarketItemList()
+
+    rawQuery = list(np.array([findItemsInList(i, itemList) for i in queries]).flatten())
+    print(rawQuery)
+
+    for item in rawQuery:
+        if item not in query:
+            query.append(item)
+
+
+    for item in query:
+        orders = getWarframeMarketOrders(item['url_name'])
+        price = getItemAveragePrice(orders)
+        item['price'] = price
+
+    return query

@@ -25,7 +25,7 @@ def getWarframeMarketOrders(itemUrlName=str):
             raise Exception('Status Code: ', response.status_code)
 
         # Create variables to use from the response content
-        jsonString = str(response.content)[2:-1]
+        jsonString = response.content.decode()
         jsonDict = json.loads(jsonString)
         
         # Save response to orders file
@@ -66,7 +66,7 @@ def updateMarketItemList():
         raise Exception('Status Code: ', response.status_code)
 
     # Create variables to use from the response content
-    jsonString = str(response.content)[2:-1].replace('\\', '') # Manually remove escaped char since idk what causes them
+    jsonString = response.content.decode()
     jsonList = json.loads(jsonString)
 
     # Extract just the list of items from the json file

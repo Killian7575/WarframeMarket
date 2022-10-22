@@ -80,3 +80,8 @@ def loadMarketItemList():
         updateMarketItemList()
     
     return pickleLoad('transformedItemList', './data')
+
+def findItemsInList(query, itemList):
+    return [{"item_name": x["item_name"],
+            "url_name": x["url_name"],
+            "id": x["id"]} for x in itemList if query in x['item_name']]

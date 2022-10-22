@@ -76,10 +76,14 @@ def updateMarketItemList():
     pickleSave(itemList, 'transformedItemList', './data')
 
 def loadMarketItemList():
+    # Designate Path
     path = Path('./data/transformedItemList.pkl')
+
+    # If it doesn't exist, set it up
     if not path.exists():
         updateMarketItemList()
     
+    # Load and return itemList from file
     return pickleLoad('transformedItemList', './data')
 
 def findItemsInList(query, itemList):

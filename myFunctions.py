@@ -2,7 +2,7 @@ import requests
 from pathlib import Path
 import json
 from time import sleep
-from pickleUtil import pickleSave
+from pickleUtil import pickleSave, pickleLoad
 
 def getWarframeMarketOrders(itemUrlName):
     # Define my file path
@@ -73,3 +73,10 @@ def updateMarketItemList():
 
     # Save extracted data for later loading
     pickleSave(itemList, 'transformedItemList', './data')
+
+def loadMarketItemList():
+    path = Path('./data/transformedItemList.pkl')
+    if not path.exists():
+        updateMarketItemList()
+    
+    return pickleLoad('transformedItemList', './data')

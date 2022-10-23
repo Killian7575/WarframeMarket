@@ -70,7 +70,6 @@ def addAdditionalInfoToItems(itemList):
         # If there is more than 1 item in "items_in_set", use the one that matches what i searched 
         if len(itemInfo['payload']['item']['items_in_set']) > 1:
             for e, myItem in enumerate(itemInfo['payload']['item']['items_in_set']):
-                print(myItem)
                 if item['url_name'] == myItem['url_name']:
                     listIndex = e
 
@@ -94,7 +93,7 @@ def addAdditionalInfoToItems(itemList):
         except:
             pass
             rarity = False
-        print(f'For the item: {item["item_name"]}, added tags: {item["tags"]}, subtypes: {subtypes}, set_root: {set_root}, rarity: ')
+        print(f'For the item: {item["item_name"]}, added tags: {item["tags"]}')
 
     return itemList
 
@@ -137,7 +136,6 @@ def allQueriesInKey(queries, key, item, sType):
     if sType == 'and':
         for q in queries:
             # Check if it doesn't match item
-            #print(q, item[key])
             if q not in item[key]:
                 return False # If there's a query that doesn't match key, return False
         return True # Else return True
@@ -154,24 +152,7 @@ def findItemsInList(*queries, itemList, key='item_name', sType='and'):
 
 def queryPricesOf(*queries, itemList, key='item_name', sType='and'):
     query = findItemsInList(queries, itemList=itemList, key=key, sType=sType)
-    # Pre-set variables
-    #print('query length = ', len(queries))
-    # query = []
-    # if key == 'item_name':
-    #     #print('(IF) Checking query in key ', queries)
-    #     # Creates an "or" search that grabs all matching items for each query
-    #     rawQuery = list(np.array([findItemsInList(i, itemList, key) for i in queries]).flatten())
-
-    #     # Filters the rawQuery by removing any duplicates
-    #     for item in rawQuery:
-    #         if item not in query:
-    #             query.append(item)
-    # else:
-        #print('(ELSE) Checking query in key ', queries)
-        # Creates an "and" search that grabs all items that match all the query terms
-    
-        #print(query)
-
+   
     # Gets the current average price for each item and adds it as a key in each item
     for item in query:
         orders = getWarframeMarketOrders(item['url_name'])

@@ -56,6 +56,37 @@ def getItemAveragePrice(orderList):
     # Return average price
     return avgPrice
 
+def addAdditionalInfoToItems(itemList):
+    for item in itemList:
+        # Initialise pre-set variables
+        listIndex = 0
+
+        # Get item info i'm after which is in ['items_in_set']
+        itemInfo = getItemData(item['url_name'])
+
+        # If there is more than 1 item in "items_in_set", use the one that matches what i searched 
+        if len(itemInfo['payload']['item']['items_in_set']) > 1:
+            for e, myItem in enumerate(itemInfo['payload']['item']['items_in_set']):
+                if myItem['url_name'] == itemInfo['payload']['item']['items_in_set'][e]['url_name']:
+                    listIndex = e
+                    break
+
+        # Attempt to add each type of info to item, if it doesn't exist, just skip
+        item['tags'] = itemInfo['payload']['item']['items_in_set'][listIndex]['tags']
+        try:
+            item['subtypes'] = itemInfo['payload']['item']['items_in_set'][listIndex]['subtypes']
+        except:
+            pass
+        try:
+            item['set_root'] = itemInfo['payload']['item']['items_in_set'][listIndex]['set_root']
+        except:
+            pass
+        try:
+            item['rarity'] = itemInfo['payload']['item']['items_in_set'][listIndex]['rarity']
+        except:
+            pass
+    return itemList
+
 def updateMarketItemList():
     # Avoid spamming API by sleeping 1 second once every time the API is called
     sleep(1)
@@ -152,34 +183,3 @@ def getItemData(itemUrl=str):
 
     return itemData
 
-def addAdditionalInfoToItems(itemList):
-    # Initialise pre-set variables
-    listIndex = 0
-
-    for item in itemList:
-        
-        # Get item info i'm after which is in ['items_in_set']
-        itemInfo = getItemData(item['url_name'])['payload']['item']['items_in_set']
-
-        # If there is more than 1 item in "items_in_set", use the one that matches what i searched 
-        if len(itemInfo) > 1:
-            for e, item in enumerate(itemInfo):
-                if item['url_name'] == item['url_name']:
-                    listIndex = e
-                    break
-
-        # Attempt to add each type of info to item, if it doesn't exist, just skip
-        item['tags'] = itemInfo[listIndex]['tags']
-        try:
-            item['subtypes'] = itemInfo[listIndex]['subtypes']
-        except:
-            pass
-        try:
-            item['set_root'] = itemInfo[listIndex]['set_root']
-        except:
-            pass
-        try:
-            item['rarity'] = itemInfo[listIndex]['rarity']
-        except:
-            pass
-    return itemList
